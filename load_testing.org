@@ -1,0 +1,58 @@
+
+* Intelligent experimentation
+Looking to prove the performance characteristics of your sytsem.
+
+* Grinder
+
+Grinder is a 'programmer's load-testing tool'
+
+It is scriptable
+
+Give each worker a fn that returns a fn
+
+If you can put the test in code, you can load test it.
+
+Can write the tests in *any* testing framework and plug into grinder.
+
+* Test data 
+
+Can take tests you got, rebind them into grinder. 
+
+Generated tests: test.generative? 
+
+Shared data: Distrubted? via shared state. Concurrency.
+
+These are things we *could* be doing with load testing
+
+* Running tests
+
+Generating loads : grinder agents, can start these on EC2 via pallet.
+"Pallet, spawn me 10 agents" .
+
+Hadoop and map-reduce : Grinder is just doing something simialr so you
+could use those instead.
+
+Incorporate with CI. If you run load testing through CI... grinder has
+a headless mode. Can generate load on a daily basis - give you a
+deeper understanding of the app. Can potentially see where commits
+slow the app down. 
+
+* Logging
+
+ SLF4J (new log4j): syslog, s3, simpledb
+
+Need to log somewhere. 
+
+Sends custom headers to the app, which we can associate to the
+application's logs : so can do analysis join up app and load logs.
+
+Log analysis. Simple as bash grep sed. Or a log viewer. 
+
+Need custom statistics.
+
+* Test analysis. 
+
+* Conc
+
+Clojure gives us a lot of power to dig into the application's
+performance. Steep but not terrible learning curve and a lot of good tools.
