@@ -1,0 +1,26 @@
+* 
+Inst #inst reader macro - date times
+
+* Clojure reader dispatch 
+
+It's not just parens - lot more shit going on at reader 
+
+Syntax quote is not an object - as soon as read in it is gone and you
+have a 'pile of code'
+
+Macro expansion - does not eval args
+
+(defmacro foo [x y] (print x) y)
+
+(foo 1 (foo 2 (foo 3)))
+
+puts out 1 2 3
+
+(defn would be 3 2 1
+
+Start from expected output and parameterize it, use syntax
+quoting/unquoting
+
+When to use macros?
+
+Macro compliationc

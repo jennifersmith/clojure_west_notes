@@ -1,0 +1,335 @@
+* Datomic
+** Problems
+*** Complexity
+"Out of the Tar Pit" Mosely and Marks
+
+State and control as a source of complexity.
+
+Paper caused him to make immutability the default and 'stick to his
+guns'
+
+Paper is of challenges not answers.
+
+Writing programs 'algebraic' easy to understand, simple - no
+complexity of state and control.
+
+Does not cover how you actually update that state.
+
+Still got to read _+ write to the database. Nasty
+
+Datomic about closing loop and solving the database problem.
+
+*** Declarative programming
+Most of time only people do it with sql. but now got cascalog. *Much*
+better than manipulating data than other languages even clojure. 
+
+"Trapped in the server"
+What's the data basis:
+What's that stuff, how did it get there, did it get updated since I
+last looked.
+
+*** "Over There"
+Client-server has limitations, round trips.
+
+Very complex queries to get everything you need in one shot - they
+burn the database.
+
+Often our queries do two things: select the fields for the report
+*AND* query the data cos you wanna do in one go for perofrmance.
+
+*** Consistency and scale
+
+Without consistency comes an ass load of complexity.... sometimes you
+need it (massive data sets), but sometimes you dont
+
+Can we have the best of both worlds? Consistency and scalability.
+
+*** Flexibility
+
+Sparse data - everyone is tired of 'the rectangles'.
+
+Multi-value fields
+
+Freedom from structural rigidity/pervasion. Pervasion of structural
+rigidity - it gets into your program and makes it harder to change.
+
+*** Time
+
+Going back to old-school 'memory and records'. We remember stuff, we
+don't replace our old phone number with our new in our head
+
+If you dont replace, you get auditing which we all want
+
+
+
+*** Perception and reaction
+
+Without polling
+
+** The solution
+
+Model: Peers that can React Remember Perceive and Decide
+
+*** State
+
+Trad databases replace things "Place Oriented Programming"
+
+Tree rings - the inner bits of the tree are still there and dont
+change. 
+
+The past doesn't change. Immutable. All you can do is grow it.
+
+Process: inserts and updates. Update is not really update: you dont go
+back and erase your previous phone number and replace it.
+
+Really: new state means new space.
+
+You probably not worried about your tree growing to take over the
+house.
+
+
+*** Process
+
+Reify process - something we can touch, hold onto and pass around.
+
+Primitive representation of novelty
+
+Representation of novelty needs to be as small as possible. One way is
+as the assertion and retraction of facts. "Your email is X" "Your
+email is now Y"
+
+*** Declarative programming
+
+Move the power into the applications (Datalog??)
+
+These queries can work on anything: data structure
+
+Call back to user code
+
+*** Over There Problem
+
+Move the data.
+
+Client server is based on model of hardware that is rapidly
+disappearing to us.
+
+Privilege of data access that was avaiable to that server can be
+shared out (SSD, networking).
+
+... so what is storage? Not a lot of disks you can connect multiple
+peers to: San? Storage as a Service.... 
+
+Same as see in clojure: most design is about taking shit apart
+
+Applications are peers: notion of privileged server goes away
+
+*** Consistency and scale
+
+Separate read/writes
+
+If you want to see data, you have to go somewhere. If you wanna see
+consistent data, you gotta go there and stop everyone else doing work.
+
+Separating reading and writing and lets you make different decisions
+re consistency and scale.
+
+Never had a problem flooding server with Writes : it's reads that are
+the problem.
+
+Immutability means that we can read from copies - no transactions for
+reads. We only needed that cos of place-oriented programming.  
+
+Transactions for writes. 
+
+*** Flexibility
+
+Take inspiration from RDF: Subject Predicate Object.
+
+But that's not a whole fact. "Sally likes Pizza" : has she always
+liked pizza.
+
+FACTS HAVE TIME.
+
+Datom: E/A/V/Tx
+
+Entity Attribute Value Time
+
+*** Time 
+
+Transactions are first class entities.
+
+Time is just an attribute of the transaction.
+
+Db values at points in time.
+
+"Give me the value of the database as of last week"
+
+"Give me the database of 11am, so we can track down the bug"
+
+*** Perception and reaction
+
+Push process around: cos it's represented as a 1st class object.
+
+Query process: subscribe to updates?
+
+Before/after db values..
+
+** Architecture
+
+Peer lib includes Communication components, query engine (+ live index
+and caching).
+
+"Transactor AMI" : Only handles transacted writes. 
+
+Storage service: Dynamo DB just for now. Riak would be awesome.
+
+You can make independent choices of storage service: price, scale etc.
+etc.
+
+Transactors put stuff in storage, peers read it out.
+
+Also transactor reflects changes out to any connected peers.
+
+*** State
+
+Immutable expanding value...
+
+Must be organised to support query: sorted set of facts.
+
+Maintaining live sort in storage is bad. 
+
+BigTable: Accumulates novelty in mem and periodically write it to
+storage : occiasionally merge into storage.
+
+Datomic uses trees: as we storing an immutable thing. "Right way to do
+that is with a tree".
+
+Persistent trees in memory, durable persistent trees in storage. Accum
+in memory, periodically move into stoage
+
+*** Storage
+
+Log of tx asserts/retracts : in tree
+
+Also index trees. "Covering": has all the data (parts of the datom)
+you need sorted in different ways
+
+Storage requirements: 
+Implements Key->Value  . Values dont store 'pizza', will store entire
+portions of index tree. Actually Key to Blob
+
+Atoms: Consistent reads
+Pods: conditional put
+
+This needs to be in other KV stores so datomic can work on top of them
+
+** Index storage
+
+storing by E/A/V/Tx or A/V/E/Tx .... for querying
+
+Low level leaf segments of tree is what gets stuck in storage
+
+** What's in a db value
+
+** Process
+
+Assert/retract can't aexpress transformation
+
+Another notion of what constitutes an input to a trans. Data function
+(f db & args) => tx-data
+
+tx-data : assert|retract|datafn
+
+Expand out into a tree of asserts and retracts and data fns.
+
+The "Process version of macro expansion".
+
+** Transactor
+
+Accepts transactions... expands, applies logs boradcasts (expands as
+above)
+
+Periodically indexes: the indexer could be pulled out
+
+Indexing creates garbage : GC collection in storage.
+
+** Declarative programming
+
+Embedded datalog.
+
+Arguments to queries: datasources and args. 
+
+Datasource not ambient or global. Allows us to query Now db or
+Yesterday Db.
+
+Expressions: your own code
+
+** Over Here
+
+Peers directly access storage service, until transactor tells them
+otherwise.
+
+Own query engine
+
+Live mem index and merging as on storage
+
+Two tier cache: Segments and datoms. Top level: millions of objects,
+second tier: byte segments 
+
+** Consistency and scale
+
+Writes go thru transactor
+
+Trad server scaling/availability.
+
+Immutability supports consistent reads *without* transactions. 
+
+Computational load scales with peers: as query is on each box. An
+analytics qury not gonna mess anyone else up
+
+"If you dont need transactions, maybe this is not for you"
+
+** Flexibility
+
+Attributes are only schema.
+
+Worth spending this much efford typing your attributes not just 'its a
+string'.
+
+name, cardinality, component,, unique , ident
+
+If you say cardinality = 1 , then asking for attribute just returns
+one... if it is >1 then returns a set. That is all. Store as facts
+just the same.
+
+"component": Your arm is a part of you but your grandma is not. One is
+a part of you, one is a relationship
+
+** Time
+
+DB Values: multiple dbs in query (as all on peer)
+
+"asOf" 
+"with" : what would this database look like if I did this transaction
+(testing ?)
+
+** Perception /reaction
+
+Tap into live index feed: queue of tx events : tx-data, db-before,
+db-after
+
+* Summary
+
+State/time/identity model should be familiar. Didn't set out to make
+it the same but it ended up being the same.
+
+Reification of process.
+
+Dynamic merge: essential. You cannot store persistent data structures
+on disk live.
+
+Immutability Rocks!!
+
+It's an essential characteric of the universe
+
+Choose immutability and see where it takes you.

@@ -1,0 +1,264 @@
+* Why clojure sucks but why you love it anyway!
+
+Been doing clojure a long time - know what is good and what is worth
+avoiding. Writing book crystallized what is excellent, and what you
+need to just deal with to do the work you gotta do.
+Presenting what is a little difficult, a little warty.
+
+* Objectives
+
+Present a fair critique of Clojure from prag user's perspective. More
+from a commerical less hobbyist perspective.
+
+What would you wish you know now in a year or so?
+
+Really easy to write a flamy blog post "X Sucks".
+
+But it's more rewarding to have a discussion about the shortcomings
+about something we love and enjoy. Maybe we can address the things we
+bug the most.
+
+Quote from Ratatouille
+
+Damaging effect of reflex criticism can damage something that is new.
+"It didn't work in my circumstances so it sucks". Something new like
+clojure needs people that are not blind.
+
+"YOur favorite programming language is not good enough" Frederick
+Haard
+
+* Namespaces
+
+ns/ load-file / reuqire / refer /refer-clpojure / use / import
+
+Namespaces are better than other languages but this junk is very
+complex (above).
+
+Is actually one of oldest things in the language. People trip on it
+every single time. 
+
+(require '...) vs (:require ...)
+
+No (:import com.package.* ) ... makes interop a bit more painful.
+
+If you have to work with a lib and touch like 20 types, then the
+import statement is huge asn you have to enum every class.
+
+(def f ns/g) vs (def f #'ns/g)
+
+left asigns f to g, but second assigns f to the var of g.
+
+OK for normal run, but if you are connected to a repl the second form
+is better as you dont need to redef f ... 
+
+(import foo.AType) fails if 'foo hasn't been loaded... you need to
+require that first. Point of repetition that shouldn need to exist.
+
+Cannot build incrementally: can't say "I want a namespace that is like
+this one plus XYZ" instead copy pasting a bunch of includes
+
+All ns operations are risky and side-effcting : if one fails to load,
+then you get a half loaded namespace. 
+
+* declare
+
+(defn main [args] (helper args))
+(defn helpler [args] ...)
+
+This doesn't work: no forward references.
+
+One of few places programmer has to babysit the compiler.
+
+But for readability, you want to see the 'top level' functions at the
+top of the file, not the helper functions.
+
+Unintuitive compilation unit: each top level form is a compilation
+unit.
+
+* Dynamic scope
+
+(with-foo {} (f a b c))
+
+(f {} a b c)
+
+Dynamic vars become implicit args to every fn
+
+Mutable state... makes hard to test and reason about.
+
+"In the past few years I stopped working with dynamic scope."
+
+Binding conveyance: prior to 1.3 if you set up some dynamic scope and
+started upa future, the dynamic scope does not exist in context of the
+future. You shouldn't have to think about where the state is coming
+from... have to set up all new scopes and stuff.
+
+(almost) considerd harmful !! 
+
+There are not a lot of reasons to use and recommend in general
+practiec. Couple of good examples : returning more than one thing.
+Like returning response codes or something when you are really just
+returning a body.
+
+* Using STM (effectively) is hard
+
+Appears easy: lots of examples and tutorials where these are simple to
+exhibit characteriscs of system.
+
+Makes it sound like a piece of magic fairy dust.
+
+In essence it is an in-memory database implementation with superio
+clojure integration
+
+How do you figure out the optimal ref granualrity. Blog post "The
+world in a ref"...
+
+Do you put all your keys and the top level world in a a ref : serious
+contention issues. Lots of different keys and refs in refs, lose
+ability to snapshot? Not a well known way of figuring out how.
+
+Transactions : nondeterministic... high load, long runnign
+transactions. Not easy to tell if a trans will pass/fail
+
+STM is a new field overall not just in clojure: more work needed to
+develop good guidelines on ref structuring.
+
+STM is overused because it is a key feature of clojure... so is
+probably used more than it should be. Lots of stuff can and should be
+stateless.
+
+* You will read Clojure's source
+
+Chunked seqs
+
+:inline and definline
+
+clojure.core et al
+
+You should read it but you shouldn't have to!
+
+* The JVM
+
+Startup time... but it's getting better under jdk 1.7 : 2 seconds to
+repl
+
+"The Library myth"
+
+The great thing is there is a lot of libraries... the bad thing is
+there is a lot of libraries.
+
+Tend to wrap stuff in the jvm libraries.
+
+Develop a refined pallette for java libraries - favor the ones that
+are easy to wrap into clojure. Functions returning voids...
+sideaffects... run fast in the opposite direction. Or ones with
+reliance on passing in reference to a subclass of an abstract class -
+end up using gen-class everywhere.
+
+There are some 'gems' but in other areas you need to exercise caution.
+
+Saving graces: fast damn fast, reliable, distrubtion.
+
+* AOT compilation
+
+Generates java class files - ahead of time compilation. But don't use
+it... 
+
+Compilation is transitive through all dependencies: once you do one,
+you do all.
+
+Open issue that should be addressed.
+
+But also it introduces compatability risks: something compiled for
+clojure 1.2 might not work with 1.3 - as implementation details inside
+might have changed.
+
+If you absolutely have to, limit to final app delivery. DONT do it for
+stuff you put onto clojars.
+
+* (((OMG the parens ))) 
+
+We hvae come to love them. Other people hate them. Stockholm syndrome.
+
+Homeoiconicity => Macros, but they are rarely what you want.
+
+Macros are too easy. Again it's a key feature of clojure so people use
+it often but ends up being a disaster in a lot of scenarios.
+
+"Shouldn't need to write ASTs in order to modify them" : Scala, Groovy
+et al have non-homeoiconic meta-programming macro systems.
+
+Homeiconicity does not simplify many aspects of metaprogramming??
+
+* "Over-enthusiasm"
+
+Clojure everywhere!
+
+People want to use it for every purpose everywhere. 
+
+Pervasive reader: Sexps are not
+always superior. No binary reperesntation??? 
+
+* Big ball of mud
+
+Lisp is called a big ball of mud. Compliment or insult?
+More a ball of yarn!
+Composing functions leads to shitty stacktraces.
+
+* Learning curves
+
+* Crossing the Chasm(s)
+
+Lots of things someone coming into clojure needs to understand in
+order to become productive and have happy outcome.
+
+Not sure what the solution is. 
+
+How do you learn to effectively use and apply clojure libraries.
+Clojure Atlas. 
+
+Tooling and all that stuff. Your environment needs easy to use , easy
+to maintain support for clojure you are stuffed.
+
+Installation => Documentation => Tools => Consumption/distribution
+
+A lot of these are meta, around the language less the language itself
+
+* Bus factor
+
+Clojure's continues to be 1 !!!!
+
+A singular vision is the only way a language can develop and thrive.
+So it had to be one at some point but it continues to be one. If you
+are building your livlihood off it, that can be worrying.
+
+viz. Mark Pilgrim, _why
+
+cf. Apache CouchDB's bus factor is N - good as Damien Katz moved on
+(CouchBase). If bus factor had been 1, couchdb would have effectively
+been finished. As it had been folded into apache process. Ensures the
+lifetime of it. Companies pledged support. And couchdb looks more
+vibrant now.
+
+* Bus factor mitigation
+
+EPL
+
+Killer open source community. Trusts the community to be able to make
+a release of it on its own.
+
+The ideas in Clojure and their composition are more important than any
+particular implementation.
+
+We all use the jvm one but there are others: ClojureCLR,
+ClojureScript, pyclojure, clojurescheme
+
+Given the communtiy and the expertise, one's investment in clojure is
+very safe from any threat.
+
+Community of power and responsibility. Need to continue bulding this.
+Willing to build new things. Help make the things that are there
+better. That will ensure longlivedness...
+
+
+
+
