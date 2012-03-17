@@ -1,0 +1,50 @@
+* Continuous Testing in Clojure
+
+Bill Caputo @logosity
+
+Been doing TDD/ test-first for a long time.
+
+Found it consistently useful for long time.
+
+"Living the polyglot dream"
+
+As went to a more repl-based style of programming,... wanted to work
+in the same way as the people already in community work then bring it
+back.
+
+Repl vs unit testing: Repl more for experimentation. Exploring APIs.
+In ruby / java might want to use a test.
+
+While the REPL lets us do stuff more efficiently. 
+Bottom up programming part of lisp philosphy
+
+** What is continuous testing?
+
+*** Executable documentation
+
+*** Constant feedback
+
+Running the tests with each save
+
+*** flow
+
+Want to write code.. no context switching. 
+
+Dont need to leave keyboard - continuous tests picking up the changes
+
+*** Favour speed not completeness?
+
+*NOT* a way to get the edge cases (cf Generative).
+
+*** Example
+
+expectations : Jay Fields
+
+lein-autoexpect 
+
+using vim: spearapte page for repl and for the autoexpect
+
+Using repl for debugging diagnosis rather than writing more tests.
+
+
+Makes for a better driving experience

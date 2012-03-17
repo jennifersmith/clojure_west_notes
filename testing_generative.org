@@ -1,0 +1,80 @@
+* The Generative Generation
+
+How might you use it and why might you use it.
+
+Boardgame mastermind.
+
+** where are the tests?
+"Test all the things"!!
+
+Wouldn't write a bunch of unit tests. Big domain. lOooooads of
+possiblities.
+
+Using combinatorics we can find the entire domain 
+
+(comb/selections [:r :g :b] 2) => ((:r :r) (:r :g) ..etc
+
+Can turn this into a function: generate every single possible guess
+for our domain. 
+
+Throw that to a score-inputs method, and return all possible secret
+guesses and scores.
+
+How do we test? Look at it. Really hard? 
+
+Could examine the entire thing in a pretty table or something. By eye.
+
+People do this - it is a valid form of QA in some settings. Spot
+checks. 
+
+* Experiment with test.generative
+
+(gen/boolean) [ false false true ture true ]...
+
+Can give our own input generators. Just functions
+
+** Defint eth system constraints and contracts
+
+Generated data, generated the domain.
+
+"scoring is symetric" "scoring is bounded by number of pegs"
+
+Can turn these inot a spec - 
+
+(defspec score-invariants 
+  [ metadata for each of the generators
+
+
+Can run it for three minutes, three weeks! 
+
+Control the seed/level of randomness
+
+** What happens when a test fails
+
+You get the 'form' back... means you can run it.
+
+Other frameworks hvae 'shrinking' : trying to find the simplest form
+of the failure.
+
+... but there is not much to this example. It's just a few lines of
+code.
+
+** Clojure numerics
+
+Practical case for using this.
+
+Certain laws of mathematics that we need to follow. 
+
+These laws are very well known. Communicative law, distributive laws.
+
+Can build up sets of laws we know to be true.
+
+** Hashes
+Another example: found a collision bug recently.
+
+Can find the edge cases a lot lot faster.
+
+Talk slides to be found here:
+https://github.com/abedra/the-generative-generation
+
+Contains useful links 
